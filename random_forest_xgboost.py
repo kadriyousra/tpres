@@ -96,3 +96,47 @@ plt.ylabel("True Positive Rate")
 plt.title("ROC Curve")
 plt.legend()
 plt.show()
+
+
+# Sélectionner les 10 caractéristiques les plus importantes pour chaque modèle
+top_n = 10  
+
+# Obtenir les indices des 10 caractéristiques les plus importantes
+top_features_rf = [data.feature_names[i] for i in rf_indices[:top_n]]
+top_features_xgb = [data.feature_names[i] for i in xgb_indices[:top_n]]
+
+print("Top 10 Features (Random Forest):", top_features_rf)
+print("Top 10 Features (XGBoost):", top_features_xgb)
+
+# Créer un nouveau dataset en gardant uniquement ces caractéristiques
+X_train_rf = pd.DataFrame(X_train, columns=data.feature_names)[top_features_rf]
+X_test_rf = pd.DataFrame(X_test, columns=data.feature_names)[top_features_rf]
+
+X_train_xgb = pd.DataFrame(X_train, columns=data.feature_names)[top_features_xgb]
+X_test_xgb = pd.DataFrame(X_test, columns=data.feature_names)[top_features_xgb]
+
+# Réentraîner Random Forest avec les 10 meilleures caractéristiques
+best_rf.fit(X_train_rf, y_train)
+y_proba_rf_reduced = evaluate_model(best_rf, X_test_rf, y_test)
+
+# Réentraîner XGBoost avec les 10 meilleures caractéristiques
+best_xgb.fit(X_train_xgb, y_train)
+y_proba_xgb_reduced = evaluate_model(best_xgb, X_test_xgb, y_test)
+
+# Comparer la performance
+plt.figure(figsize=(8, 6))
+fpr_rf_reduced, tpr_rf_reduced, _ = roc_curve(y_test, y_proba_rf_reduced)
+fpr_xgb_reduced, tpr_xgb_reduced, _ = roc_curve(y_test, y_proba_xgb_reduced)
+
+plt.plot(fpr_rf, tpr_rf, label="RF (All Features) AUC = {:.2f}".format(roc_auc_score(y_test, y_proba_rf)))
+plt.plot(fpr_rf_reduced, tpr_rf_reduced, label="RF (Top 10 Features) AUC = {:.2f}".format(roc_auc_score(y_test, y_proba_rf_reduced)))
+
+plt.plot(fpr_xgb, tpr_xgb, label="XGB (All Features) AUC = {:.2f}".format(roc_auc_score(y_test, y_proba_xgb)))
+plt.plot(fpr_xgb_reduced, tpr_xgb_reduced, label="XGB (Top 10 Features) AUC = {:.2f}".format(roc_auc_score(y_test, y_proba_xgb_reduced)))
+
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve (Comparison)")
+plt.legend()
+plt.show()
