@@ -43,6 +43,8 @@ best_rf = grid_search_rf.best_estimator_
 y_proba_rf = evaluate_model(best_rf, X_test, y_test)
 print(f"Best Parameters for RF: {grid_search_rf.best_params_}")
 print(f"Training Time: {runtime_rf:.2f} seconds\n")
+ 
+
 
 # GridSearchCV for XGBoost
 param_grid_xgb = {
