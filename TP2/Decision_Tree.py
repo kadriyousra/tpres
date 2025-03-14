@@ -82,13 +82,15 @@ X_train_dt_top = pd.DataFrame(X_train, columns=data.feature_names)[top_features_
 X_test_dt_top = pd.DataFrame(X_test, columns=data.feature_names)[top_features_dt]
 
 # Retrain Decision Tree with the top 10 features
+start_time = time.time()
 best_dt.fit(X_train_dt_top, y_train)
+runtime_dt = time.time() - start_time
 y_proba_dt_reduced = evaluate_model(best_dt, X_test_dt_top, y_test)
 
 # Compare Performance
 plt.figure(figsize=(8, 6))
 fpr_dt_reduced, tpr_dt_reduced, _ = roc_curve(y_test, y_proba_dt_reduced)
-
+print(f"Training Time: {runtime_dt:.2f} seconds\n")
 plt.plot(fpr_dt, tpr_dt, label="DT (All Features) AUC = {:.2f}".format(roc_auc_score(y_test, y_proba_dt)))
 plt.plot(fpr_dt_reduced, tpr_dt_reduced, label="DT (Top 10 Features) AUC = {:.2f}".format(roc_auc_score(y_test, y_proba_dt_reduced)))
 
